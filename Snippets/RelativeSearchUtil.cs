@@ -1,11 +1,12 @@
 ﻿namespace Snippets.RelativeSearch;
 
-internal static class RelativeSearchUtils
+internal static class RelativeSearchUtil
 {
-  public static readonly UtilityInfo Info = new UtilityInfo(
+  public static readonly UtilityInfo Info = new(
     Name:        "relative-search",
     Description: "Given a sequence of bytes and a file, return addresses in that file matching bytes in that sequence (or where each value is offset by the same amount).",
     Usage:       "<file> <byte1> <byte2>...",
+    Platforms:   SupportedPlatforms.All,
     CommandLine: CommandLine);
 
   public static void CommandLine(string[] args)

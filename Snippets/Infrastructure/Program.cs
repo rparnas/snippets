@@ -1,4 +1,6 @@
-﻿namespace Snippets;
+﻿using System.Runtime.InteropServices;
+
+namespace Snippets;
 
 internal static class Program
 {
@@ -6,21 +8,26 @@ internal static class Program
   {
     var utilities = new List<UtilityInfo>
     {
-      RelativeSearch.RelativeSearchUtils.Info,
+      RelativeSearch.RelativeSearchUtil.Info,
+      VideoRuler.VideoRulerUtil.Info,
     };
 
     try
     {
       var utilityName = args.FirstOrDefault();
-      var utilityArgs = utilityName is null ? Array.Empty<string>() : args.Skip(1).ToArray();
+      var utilityArgs = utilityName is null ? [] : args.Skip(1).ToArray();
       var utility = utilities.FirstOrDefault(x => x.Name == utilityName);
-      if (utility is not null)
+      if (utility is null)
       {
-        utility.CommandLine(utilityArgs);
+        throw new UsageException();
+      }
+      else if (!GetIsPlatformSupported(utility.Platforms))
+      {
+        Console.WriteLine($@"The utility '{utility.Name}' is not supported on this platform");
       }
       else
       {
-        throw new UsageException();
+        utility.CommandLine(utilityArgs);
       }
     }
     catch (UsageException)
@@ -29,20 +36,28 @@ internal static class Program
     }
   }
 
+  static bool GetIsPlatformSupported(SupportedPlatforms platforms)
+  {
+    return 
+      (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && platforms.HasFlag(SupportedPlatforms.Windows)) ||
+      (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && platforms.HasFlag(SupportedPlatforms.Linux)) ||
+      (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && platforms.HasFlag(SupportedPlatforms.MacOS));
+  }
+
   static void WriteUsages(List<UtilityInfo> utilities)
   {
     var lines = new List<string>
     {
-      "Usages:",
+      "Available Utilities:",
       string.Empty,
     };
 
     foreach (var utility in utilities)
     {
       lines.AddRange([
-        $@"  {utility.Name}",
+        $@"  ----{utility.Name}----",
         $@"  {utility.Description}",
-        $@"  {utility.Usage}",
+        $@"  Usage: snippets {utility.Name} {utility.Usage}",
         string.Empty,
         ]);
     }
