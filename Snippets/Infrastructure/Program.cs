@@ -46,18 +46,41 @@ internal static class Program
 
   static void WriteUsages(List<UtilityInfo> utilities)
   {
+    static string GetPlatformString(SupportedPlatforms platforms)
+    {
+      if (platforms == SupportedPlatforms.All)
+        return nameof(SupportedPlatforms.All);
+
+      var supportedPlatforms = new[] { SupportedPlatforms.Windows, SupportedPlatforms.Linux, SupportedPlatforms.MacOS }
+        .Where(platform => platforms.HasFlag(platform))
+        .Select(platform => platform.ToString())
+        .ToArray();
+
+      var count = supportedPlatforms.Length;
+
+      return
+        count == 0 ? nameof(SupportedPlatforms.None) :
+        count == 1 ? supportedPlatforms.Single() :
+        count == 2 ? $@"{supportedPlatforms[0]} or {supportedPlatforms[1]}" :
+        string.Join(", ", supportedPlatforms, 0, supportedPlatforms.Length - 1) + $", or {supportedPlatforms.Last()}";
+    }
+
     var lines = new List<string>
     {
-      "Available Utilities:",
+      "# snippets",
+      "A collection of small algorithms and mini-projects",
+      string.Empty,
+      "## Available Utilities:",
       string.Empty,
     };
 
     foreach (var utility in utilities)
     {
       lines.AddRange([
-        $@"  ----{utility.Name}----",
-        $@"  {utility.Description}",
-        $@"  Usage: snippets {utility.Name} {utility.Usage}",
+        $@"### {utility.Name}",
+        $@"{utility.Description}",
+        $@"Platform(s): {GetPlatformString(utility.Platforms)}",
+        $@"Usage: snippets {utility.Name} {utility.Usage}",
         string.Empty,
         ]);
     }
